@@ -1,37 +1,58 @@
 import store from "../store.js";
+import Todo from "../models/todos.js";
 
 // @ts-ignore
 const todoApi = axios.create({
-  baseURL: "https://bcw-sandbox.herokuapp.com/api/YOURNAME/todos/",
+  baseURL: "https://bcw-sandbox.herokuapp.com/api/Noah/todos/",
   timeout: 8000
 });
 
 class TodoService {
   getTodos() {
-    console.log("Getting the Todo List");
-    todoApi.get();
-    //TODO Handle this response from the server
+    todoApi.get("").then(res => {
+      let todoData = res.data.data.map(t => new Todo(t))
+      store.commit("todos", todoData)
+    })
+      .catch(err => {
+        console.error(err)
+      })
   }
 
-  addTodoAsync(todo) {
-    todoApi.post("", todo);
-    //TODO Handle this response from the server (hint: what data comes back, do you want this?)
+  addTodo(todo) {
+    todoApi.post("", todo).then(res => {
+      let newTodo = new Todo(res.data.data)
+      let myTodos = [...store.State.todos, newTodo]
+      store.commit("todos", myTodos)
+    })
+      .catch(err => {
+        console.error(err)
+      })
   }
 
-  toggleTodoStatusAsync(todoId) {
+  toggleTodoStatus(todoId) {
     let todo = store.State.todos.find(todo => todo._id == todoId);
-    //TODO Make sure that you found a todo,
-    //		and if you did find one
-    //		change its completed status to whatever it is not (ex: false => true or true => false)
+    if (todo && todo.completed === true) {
+      todo.complete = false
+    } else if (todo && todo.completed === false) {
+      todo.completed = true
+    }
 
-    todoApi.put(todoId, todo);
-    //TODO do you care about this data? or should you go get something else?
+    todoApi.put(todoId, todo).then(res => {
+      store.commit("todos", store.State.todos)
+    })
+      .catch(err => {
+        console.error(err)
+      })
   }
 
-  removeTodoAsync(todoId) {
-    //TODO Work through this one on your own
-    //		what is the request type
-    //		once the response comes back, what do you need to insure happens?
+  removeTodo(todoId) {
+    todoApi.delete(todoId).then(res => {
+      let filteredTodos = store.State.todos.filter(t => t._id != todoId)
+      store.commit("todos", filteredTodos)
+    })
+      .catch(err => {
+        console.error(err)
+      })
   }
 }
 

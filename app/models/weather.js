@@ -1,14 +1,18 @@
 export default class Weather {
   constructor(data) {
     console.log('[RAW WEATHER API DATA]', data);
-    //NOTE Have you ever wanted to know the temperature measured in kelvin? 
-    //      That is what this data returns! data.main.temp is the temperature in Kelvin
 
 
-    //TODO You should probably convert the temperature data to either F or C
-    //      check out the other data that comes back and see if there is anything you want to try
-
-    this.city = data.name
+    this.name = data.name
     this.kelvin = data.main.temp
+    this.fahrenheit = data.fahrenheit || Math.round((this.kelvin - 273.15) * (9 / 5) + 32)
+    this.celsius = data.celsius || Math.round(this.kelvin - 273.15)
+    console.log(this.fahrenheit, this.celsius)
+  }
+
+  get wTemplate() {
+    return `
+    <p class="bg-light text-dark">It is ${this.fahrenheit}°F or ${this.celsius}°C     in ${this.name} right now!</p>
+    `
   }
 }
